@@ -33,7 +33,7 @@ function sameText(a, b) {
   return x.length === y.length && timingSafeEqual(x, y);
 }
 
-export function createAccounts({ store, mailer, secret, adminEmails = [], clock = () => new Date() }) {
+export function createAccounts({ store, mailer, secret, adminEmails = [], clock = () => new Date(), log = console.info }) {
   if (!secret) throw new Error('a session secret is required');
   const admins = new Set(adminEmails.map((e) => e.trim().toLowerCase()).filter(Boolean));
   const nowMs = () => clock().getTime();
@@ -62,16 +62,17 @@ export function createAccounts({ store, mailer, secret, adminEmails = [], clock 
     return stored ? { ...stored, fromSettings: false } : null;
   }
 
+  // The person always sees the same response; the server log says what happened.
   async function requestCode(rawEmail) {
     const email = normalizeEmail(rawEmail);
-    if (!(await userFor(email))) return;
+    if (!(await userFor(email))) return log(`no code sent to ${email}: not an admin or guide`);
 
     const now = nowMs();
     const previous = await store.getOtp(email);
-    if (previous && now - previous.sentAt < RESEND_MS) return;
+    if (previous && now - previous.sentAt < RESEND_MS) return log(`no code sent to ${email}: last code was under a minute ago`);
     const sameWindow = previous && now - previous.windowStart < DAY_MS;
     const sends = sameWindow ? previous.sends + 1 : 1;
-    if (sends > DAILY_SENDS) return;
+    if (sends > DAILY_SENDS) return log(`no code sent to ${email}: daily limit reached`);
 
     const code = String(randomInt(0, 1_000_000)).padStart(6, '0');
     await store.saveOtp(email, {
@@ -82,7 +83,14 @@ export function createAccounts({ store, mailer, secret, adminEmails = [], clock 
       windowStart: sameWindow ? previous.windowStart : now,
       sends,
     });
-    await mailer.sendCode(email, code);
+    try {
+      await mailer.sendCode(email, code);
+    } catch (err) {
+      await store.deleteOtp(email);
+      console.error(`sign-in email to ${email} failed:`, err.name, err.message);
+      throw new HttpError(502, 'we could not send the sign-in email; please try again in a minute');
+    }
+    log(`sign-in code sent to ${email}`);
   }
 
   async function verifyCode(rawEmail, rawCode) {

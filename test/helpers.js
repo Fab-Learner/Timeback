@@ -25,6 +25,6 @@ export async function setup({ store = createMemoryStore(), adminEmails = ['admin
     clock,
     coach: async ({ correct }) => (correct ? 'Nice' : 'Try again'),
   });
-  const accounts = createAccounts({ store, mailer: inbox.mailer, secret: 'test-secret', adminEmails, clock });
+  const accounts = createAccounts({ store, mailer: inbox.mailer, secret: 'test-secret', adminEmails, clock, log: () => {} });
   return { store, service, accounts, inbox };
 }

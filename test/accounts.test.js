@@ -100,3 +100,32 @@ test('admins cannot remove themselves or settings admins', async () => {
   await assert.rejects(accounts.deleteUser('other@school.test', 'other@school.test'), /yourself/);
   await assert.rejects(accounts.deleteUser('admin@school.test', 'other@school.test'), /ADMIN_EMAILS/);
 });
+
+test('a failed email send is reported and can be retried at once', async () => {
+  const { store } = await setup();
+  const { createAccounts } = await import('../src/accounts.js');
+  let fail = true;
+  const sent = [];
+  const accounts = createAccounts({
+    store,
+    secret: 's',
+    adminEmails: ['admin@school.test'],
+    log: () => {},
+    mailer: {
+      sendCode: async (to, code) => {
+        if (fail) throw Object.assign(new Error('Email address is not verified'), { name: 'MessageRejected' });
+        sent.push(code);
+      },
+    },
+  });
+  const original = console.error;
+  console.error = () => {};
+  try {
+    await assert.rejects(accounts.requestCode('admin@school.test'), (err) => err.status === 502);
+  } finally {
+    console.error = original;
+  }
+  fail = false;
+  await accounts.requestCode('admin@school.test');
+  assert.equal(sent.length, 1);
+});
