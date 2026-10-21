@@ -11,25 +11,69 @@ Alpha School's software, content, or data.
 
 ## Quick start
 
-Requires Node.js 22.5 or newer (uses the built-in `node:sqlite`). No dependencies to install.
+Requires Node.js 22 or newer.
 
 ```sh
-npm start          # http://localhost:3000
+npm install
+ADMIN_EMAILS=you@example.com npm start   # http://localhost:3000
 npm test
 ```
 
-- Student view: http://localhost:3000/ — pick a student, start a 2-hour session, work through the lessons and quizzes.
-- Guide view: http://localhost:3000/guide.html — live roster with mastery, current skill, time, and waste flags.
+Without Firebase settings the app keeps data in memory (lost on restart) and prints
+sign-in codes to the terminal instead of emailing them, so you can run it with no
+accounts at all.
 
-Environment variables:
+## Pages and roles
 
-| Variable | Default | Purpose |
+| Page | Who | What |
 | --- | --- | --- |
-| `PORT` | `3000` | HTTP port |
-| `TIMEBACK_DB` | `data/timeback.db` | SQLite file |
-| `TIMEBACK_SEED` | on | Set to `0` to skip the demo students on an empty database |
-| `ANTHROPIC_API_KEY` | unset | When set, quiz hints are written by Claude. Without it, template hints are used. |
-| `TUTOR_MODEL` | `claude-haiku-5-5` | Model for quiz hints |
+| `/login.html` | everyone | Email a 6-digit code, then enter it |
+| `/` (Student) | guides, admins | Run a 2-hour session for a student on a classroom device |
+| `/guide.html` | guides, admins | Live roster with mastery, current skill, time and waste flags |
+| `/admin.html` | admins | Manage students, staff (guides and admins) and lessons |
+
+Students do not have accounts. A guide signs in on the classroom device (sign-in
+lasts 7 days) and students pick their name.
+
+### Sign-in
+- Codes are 6 digits, stored only as a keyed hash, valid for 10 minutes, and locked
+  after 5 wrong tries.
+- At most one code per minute and 10 per day per email.
+- Unknown emails get the same response as known ones, so the form cannot be used to
+  find out who has an account.
+- The session is a signed, HttpOnly cookie. The user's role is checked on every
+  request, so removing someone takes effect immediately.
+- State-changing requests must be JSON, which blocks cross-site form posts.
+
+## Configuration
+
+| Variable | Purpose |
+| --- | --- |
+| `FIREBASE_SERVICE_ACCOUNT` | Service account key JSON. When set, data is stored in Firestore. |
+| `ADMIN_EMAILS` | Comma-separated emails that are always admins. Use it for the first admin. |
+| `SESSION_SECRET` | Random secret that signs sign-in cookies and code hashes. Required when deployed. |
+| `EMAIL_FROM` | Sender address for sign-in codes, verified in Amazon SES |
+| `SES_REGION`, `SES_ACCESS_KEY_ID`, `SES_SECRET_ACCESS_KEY` | Amazon SES credentials (send-only IAM user) |
+| `ANTHROPIC_API_KEY` | Optional. Quiz hints are written by Claude; otherwise template hints are used. |
+| `TUTOR_MODEL` | Model for quiz hints (default `claude-haiku-5-5`) |
+| `PORT` | HTTP port (default 3000) |
+
+On first start against an empty Firestore, the lessons in `content/*.json` are loaded
+into the `skills` collection. After that, lessons are edited in the admin panel.
+
+### Firestore layout
+
+```
+students/{id}            name, grade, mastery{}, completed[], answered{}, lastSessionId
+students/{id}/answers/*  one document per quiz answer
+sessions/{id}            studentId, startedAt, endedAt, activeSeconds, idleSeconds
+users/{email}            name, role (admin | guide)
+otps/{email}             hashed sign-in code and its limits
+skills/{id}              name, subject, order, prereqs[], activities[]
+```
+
+The server uses the Firebase Admin SDK, which bypasses security rules, so the database
+can stay in production mode with all browser access denied.
 
 ## How it works
 
@@ -63,28 +107,36 @@ answer, and the app falls back to the template if the call fails or times out.
 ## Layout
 
 ```
-server.js            entry point
+server.js            entry point and configuration
 src/
-  db.js              SQLite schema (node:sqlite)
-  content.js         loads and validates the skill graph
+  store/firestore.js Firestore storage
+  store/memory.js    in-memory storage (tests, local development)
+  accounts.js        email-code sign-in, sessions, staff
+  mailer.js          Amazon SES email (console output in development)
+  content.js         validates the skill graph
   mastery.js         scoring, mastery, and next-activity selection
   waste.js           idle-time accounting and waste levels
   tutor.js           AI hints with a template fallback
-  service.js         business logic over the database
-  api.js             HTTP routes -> service
+  service.js         learning, reporting and admin logic over the store
+  api.js             HTTP routes, roles and cookies
   http.js            HTTP server and static files
-  seed.js            demo students
-content/             subjects, skills, lessons, and quiz questions (JSON)
-public/              student and guide pages (plain HTML, CSS, and JS)
-test/                unit, service, and HTTP tests
+  seed.js            demo students for in-memory storage
+content/             starting lessons, loaded into an empty database
+public/              student, guide, admin and sign-in pages (plain HTML, CSS, JS)
+test/                unit, store, service, sign-in and HTTP tests
 ```
 
 ## API
 
+Sign-in: `POST /api/auth/request {email}`, `POST /api/auth/verify {email, code}`,
+`POST /api/auth/logout`, `GET /api/auth/me`.
+
+Guides and admins:
+
 | Method | Path | Purpose |
 | --- | --- | --- |
 | GET | `/api/content` | Skills and activities (no answer keys) |
-| GET / POST | `/api/students` | List or create students |
+| GET | `/api/students` | List students |
 | GET | `/api/students/:id/next` | Next activity and question |
 | GET | `/api/students/:id/report` | Mastery by skill and recent sessions |
 | POST | `/api/students/:id/sessions` | Start a session (ends any open one) |
@@ -92,47 +144,40 @@ test/                unit, service, and HTTP tests
 | POST | `/api/sessions/:id/complete` | `{activityId}` for a lesson |
 | POST | `/api/sessions/:id/answer` | `{activityId, choice, questionIndex}` |
 | POST | `/api/sessions/:id/end` | End the session |
-| GET | `/api/guide/roster` | Class-wide view for guides |
+| GET | `/api/guide/roster` | Class-wide view |
 
-## Adding content
+Admins only: `POST /api/admin/students`, `PUT|DELETE /api/admin/students/:id`,
+`POST /api/admin/students/:id/reset`, `GET /api/admin/users`,
+`PUT|DELETE /api/admin/users/:email`, `GET /api/admin/skills`,
+`PUT|DELETE /api/admin/skills/:id`.
 
-Add a subject file to `content/`, for example `content/science.json`:
+## Editing lessons
 
-```json
-{
-  "subject": "Science",
-  "skills": [
-    {
-      "id": "s-states",
-      "name": "States of matter",
-      "prereqs": [],
-      "activities": [
-        { "id": "s-states-lesson", "type": "reading", "title": "Solid, liquid, gas", "minutes": 8,
-          "body": ["Matter is anything that has mass and takes up space."] },
-        { "id": "s-states-quiz", "type": "quiz", "title": "States check", "minutes": 6,
-          "questions": [
-            { "id": "s-states-q1", "prompt": "Which state has a fixed shape?", "choices": ["Solid", "Liquid", "Gas"], "answer": 0, "hint": "Think of a rock." }
-          ] }
-      ]
-    }
-  ]
-}
+Use the Lessons tab in the admin panel. Each skill has a name, a subject, the skills
+that must be mastered first, and an ordered list of lessons (reading or video) and
+quizzes. Every skill needs at least one quiz. Saving checks the whole skill graph
+and explains what is wrong: missing quiz, empty choices, unknown or looping
+prerequisites, or a video link that is not https. A skill that others depend on
+cannot be deleted until it is removed from their prerequisites.
+
+## Testing
+
+```sh
+npm test                 # everything, using in-memory storage
+npm run test:firestore   # also runs the storage tests against the Firestore emulator
 ```
 
-Then import it in `content/index.js` and add it to the exported list. Every skill needs at least one quiz. `answer` is the index of the correct choice.
-Activity types are `video` (set `url` to embed a video, otherwise the body is shown),
-`reading`, and `quiz`. Startup fails with a clear error on duplicate ids, unknown
-prerequisites, or invalid answer indexes.
+`test:firestore` needs the Firebase CLI (`npm install -g firebase-tools`) and Java.
 
 ## Not included yet
 
 These are needed before real students use it:
 
-- **Authentication and roles.** The student and guide pages are open to anyone who
-  can reach the server, and there is no guide login.
-- **Privacy compliance.** Student records are stored in plain SQLite. A deployment
-  in US schools needs FERPA and COPPA controls: access logging, retention rules,
-  encryption at rest, and parental consent flows.
+- **Classes.** Every guide sees every student. There is no grouping of students into
+  classes or assigning guides to them.
+- **Privacy compliance.** A deployment in US schools needs FERPA and COPPA controls:
+  access logging, retention rules, and parental consent flows. Accept Google's data
+  processing terms for the Firebase project before real students use it.
 - **Rostering.** Students are created by hand. An integration with the district SIS
   (for example, OneRoster or Clever) would replace this.
 - **Licensed content.** The lessons are short placeholder text. Videos and reading

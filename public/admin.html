@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>TimeBack · Admin</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1>TimeBack</h1>
+    <nav id="nav"></nav>
+  </header>
+
+  <main class="wide-main">
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="students" aria-selected="true">Students</button>
+      <button role="tab" data-tab="staff">Staff</button>
+      <button role="tab" data-tab="lessons">Lessons</button>
+    </div>
+
+    <section id="tab-students" class="panel">
+      <form id="studentForm" class="inline-form">
+        <h2 id="studentFormTitle">Add a student</h2>
+        <label class="field">Name <input id="studentName" required maxlength="100"></label>
+        <label class="field">Grade <select id="studentGrade"></select></label>
+        <div class="row">
+          <button class="primary" type="submit" id="studentSave">Add student</button>
+          <button type="button" id="studentCancel" hidden>Cancel</button>
+        </div>
+      </form>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Grade</th><th></th></tr></thead>
+          <tbody id="studentRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-staff" class="panel" hidden>
+      <form id="staffForm" class="inline-form">
+        <h2>Add a guide or admin</h2>
+        <label class="field">Email <input id="staffEmail" type="email" required></label>
+        <label class="field">Name <input id="staffName" maxlength="100"></label>
+        <label class="field">Role
+          <select id="staffRole">
+            <option value="guide">Guide</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+        <div class="row"><button class="primary" type="submit">Save</button></div>
+      </form>
+      <p class="muted small">Guides can run sessions and see the roster. Admins can also manage students, staff and lessons. People sign in with a code sent to their email.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Email</th><th>Name</th><th>Role</th><th></th></tr></thead>
+          <tbody id="staffRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="tab-lessons" hidden>
+      <div class="lessons-layout">
+        <aside class="panel">
+          <button class="primary wide" id="newSkill">New skill</button>
+          <div id="skillList"></div>
+        </aside>
+        <div class="panel" id="editor">
+          <p class="muted">Pick a skill to edit, or create a new one.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

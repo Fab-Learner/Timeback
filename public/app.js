@@ -1,59 +1,22 @@
+import { $, api, el, guard, showError, startPage } from './common.js';
+
 const BEAT_MS = 15_000;
 const IDLE_MS = 60_000;
 
-const $ = (sel) => document.querySelector(sel);
 const view = { studentId: null, session: null, next: null, answer: null, lastInput: Date.now() };
-
-// Build DOM nodes without innerHTML so student-entered text is never parsed as markup.
-function el(tag, props = {}, ...children) {
-  const node = document.createElement(tag);
-  for (const [key, value] of Object.entries(props)) {
-    if (value === null || value === undefined || value === false) continue;
-    if (key === 'class') node.className = value;
-    else if (key === 'text') node.textContent = value;
-    else if (key.startsWith('on')) node.addEventListener(key.slice(2), value);
-    else node.setAttribute(key, value);
-  }
-  node.append(...children.flat().filter((c) => c !== null && c !== undefined));
-  return node;
-}
-
-async function api(method, path, body) {
-  const res = await fetch(path, {
-    method,
-    headers: body ? { 'content-type': 'application/json' } : {},
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error ?? res.statusText);
-  return data;
-}
-
-function showError(message) {
-  const box = $('#error');
-  box.textContent = message;
-  box.hidden = false;
-  setTimeout(() => (box.hidden = true), 6000);
-}
-
-// Wrap async click handlers so failures show a message instead of vanishing.
-const guard = (fn) => async (...args) => {
-  try {
-    await fn(...args);
-  } catch (err) {
-    showError(err.message);
-  }
-};
 
 async function loadStudents() {
   const students = await api('GET', '/api/students');
   $('#student').replaceChildren(
     ...students.map((s) => el('option', { value: s.id, text: `${s.name} (grade ${s.grade})` })),
   );
-  if (students.length) {
-    view.studentId = students[0].id;
-    await loadSidebar();
+  $('#start').disabled = students.length === 0;
+  if (students.length === 0) {
+    $('#activity').replaceChildren(el('p', { class: 'muted', text: 'No students yet. An admin can add them on the Admin page.' }));
+    return;
   }
+  view.studentId = students[0].id;
+  await loadSidebar();
 }
 
 async function loadSidebar() {
@@ -73,7 +36,7 @@ async function loadSidebar() {
 }
 
 async function startSession() {
-  view.studentId = Number(studentSelect().value);
+  view.studentId = $('#student').value;
   view.session = await api('POST', `/api/students/${view.studentId}/sessions`);
   await refresh();
 }
@@ -114,7 +77,7 @@ function renderActivity() {
 function renderLesson(activity) {
   const nodes = [];
   if (activity.url) {
-    nodes.push(el('iframe', { class: 'video', src: activity.url, title: activity.title, allowfullscreen: '' }));
+    nodes.push(el('iframe', { class: 'video', src: activity.url, title: activity.title, allowfullscreen: true }));
   }
   nodes.push(...activity.body.map((p) => el('p', { text: p })));
   nodes.push(el('button', { class: 'primary', text: 'Mark complete', onclick: guard(completeActivity) }));
@@ -127,12 +90,7 @@ function renderQuiz(question) {
     let cls = 'choice';
     if (result && i === result.correctIndex) cls += ' right';
     else if (result && i === result.choice) cls += ' wrong';
-    return el('button', {
-      class: cls,
-      text,
-      disabled: result ? '' : null,
-      onclick: guard(() => submitAnswer(i)),
-    });
+    return el('button', { class: cls, text, disabled: Boolean(result), onclick: guard(() => submitAnswer(i)) });
   });
 
   const footer = result
@@ -168,13 +126,18 @@ async function completeActivity() {
 
 function renderMeters() {
   const s = view.session;
-  if (!s) return;
+  if (!s) {
+    $('#time').textContent = 'not started';
+    $('#timeBar').style.width = '0';
+    $('#waste').textContent = '—';
+    $('#wasteBar').style.width = '0';
+    return;
+  }
   $('#time').textContent = `${Math.round(s.minutesUsed)} / ${s.budgetMinutes} min`;
   $('#timeBar').style.width = `${Math.min(100, (s.minutesUsed / s.budgetMinutes) * 100)}%`;
 
   const wasteBar = $('#wasteBar');
-  const hasData = s.totalSeconds > 0;
-  $('#waste').textContent = hasData ? `${Math.round(s.wastePct * 100)}% idle` : '—';
+  $('#waste').textContent = s.totalSeconds > 0 ? `${Math.round(s.wastePct * 100)}% idle` : '—';
   wasteBar.style.width = `${Math.round(s.wastePct * 100)}%`;
   wasteBar.className = `level-${s.level}`;
 }
@@ -206,10 +169,8 @@ setInterval(async () => {
   }
 }, BEAT_MS);
 
-const studentSelect = () => $('#student');
-
-studentSelect().addEventListener('change', guard(async () => {
-  view.studentId = Number(studentSelect().value);
+$('#student').addEventListener('change', guard(async () => {
+  view.studentId = $('#student').value;
   view.session = null;
   view.next = null;
   view.answer = null;
@@ -219,4 +180,7 @@ studentSelect().addEventListener('change', guard(async () => {
 }));
 $('#start').addEventListener('click', guard(startSession));
 
-loadStudents().catch((err) => showError(err.message));
+guard(async () => {
+  await startPage('index.html');
+  await loadStudents();
+})();

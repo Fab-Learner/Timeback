@@ -1,14 +1,19 @@
 {
   "name": "timeback",
-  "version": "0.1.0",
-  "description": "Two-hour, mastery-based AI tutoring platform for K-12 students with a guide dashboard.",
+  "version": "0.2.0",
+  "description": "Two-hour, mastery-based AI tutoring platform for K-12 students with guide and admin dashboards.",
   "private": true,
   "type": "module",
   "engines": {
-    "node": ">=22.5"
+    "node": ">=22"
   },
   "scripts": {
-    "start": "node --disable-warning=ExperimentalWarning server.js",
-    "test": "node --test --disable-warning=ExperimentalWarning"
+    "start": "node server.js",
+    "test": "node --test",
+    "test:firestore": "firebase emulators:exec --only firestore --project demo-timeback \"node --test\""
+  },
+  "dependencies": {
+    "@aws-sdk/client-sesv2": "^3.1154.0",
+    "firebase-admin": "^14.5.0"
   }
 }
