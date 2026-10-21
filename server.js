@@ -7,12 +7,15 @@ import { createTutor } from './src/tutor.js';
 import { createApi } from './src/api.js';
 import { createHttpServer } from './src/http.js';
 import { seedDemoStudents } from './src/seed.js';
+import subjects from './content/index.js';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const port = Number(process.env.PORT ?? 3000);
 
-const db = openDb(process.env.TIMEBACK_DB ?? join(root, 'data', 'timeback.db'));
-const content = loadContent(join(root, 'content'));
+// Vercel's deployment directory is read-only; /tmp is the only writable path there.
+const defaultDb = process.env.VERCEL ? '/tmp/timeback.db' : join(root, 'data', 'timeback.db');
+const db = openDb(process.env.TIMEBACK_DB ?? defaultDb);
+const content = loadContent(subjects);
 const service = createService({ db, content, coach: createTutor() });
 seedDemoStudents(service);
 

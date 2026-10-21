@@ -119,7 +119,7 @@ Add a subject file to `content/`, for example `content/science.json`:
 }
 ```
 
-Every skill needs at least one quiz. `answer` is the index of the correct choice.
+Then import it in `content/index.js` and add it to the exported list. Every skill needs at least one quiz. `answer` is the index of the correct choice.
 Activity types are `video` (set `url` to embed a video, otherwise the body is shown),
 `reading`, and `quiz`. Startup fails with a clear error on duplicate ids, unknown
 prerequisites, or invalid answer indexes.

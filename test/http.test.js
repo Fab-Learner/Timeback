@@ -3,11 +3,12 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { openDb } from '../src/db.js';
 import { loadContent } from '../src/content.js';
+import subjects from '../content/index.js';
 import { createService } from '../src/service.js';
 import { createApi } from '../src/api.js';
 import { createHttpServer } from '../src/http.js';
 
-const content = loadContent(fileURLToPath(new URL('../content', import.meta.url)));
+const content = loadContent(subjects);
 const service = createService({ db: openDb(':memory:'), content, coach: async () => 'hint' });
 const server = createHttpServer({
   api: createApi(service),

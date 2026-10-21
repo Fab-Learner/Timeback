@@ -1,15 +1,11 @@
-import { readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-
-// Each file in the content directory is one subject with a list of skills.
-// Skills list their prerequisites and their activities (lessons and a quiz).
-export function loadContent(dir) {
+// Each subject has a list of skills. Skills list their prerequisites and
+// their activities (lessons and a quiz). See content/index.js.
+export function loadContent(subjects) {
   const skills = [];
   const skillMap = new Map();
   const activities = new Map();
 
-  for (const file of readdirSync(dir).filter((f) => f.endsWith('.json')).sort()) {
-    const subject = JSON.parse(readFileSync(join(dir, file), 'utf8'));
+  for (const subject of subjects) {
     for (const skill of subject.skills) {
       if (skillMap.has(skill.id)) throw new Error(`duplicate skill ${skill.id}`);
       const entry = {

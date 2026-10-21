@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { openDb } from '../src/db.js';
 import { loadContent } from '../src/content.js';
+import subjects from '../content/index.js';
 import { createService, HttpError } from '../src/service.js';
 
-const content = loadContent(fileURLToPath(new URL('../content', import.meta.url)));
+const content = loadContent(subjects);
 
 function setup() {
   const db = openDb(':memory:');
