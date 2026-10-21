@@ -1,0 +1,89 @@
+{
+  "subject": "Reading",
+  "skills": [
+    {
+      "id": "r-phonics",
+      "name": "Letter sounds",
+      "prereqs": [],
+      "activities": [
+        {
+          "id": "r-phonics-lesson",
+          "type": "reading",
+          "title": "Sounds letters make",
+          "minutes": 8,
+          "body": [
+            "Each letter has a common sound. The letter b says /b/ as in ball.",
+            "Say the sound, then blend sounds together to read a word: /k/ /a/ /t/ reads cat."
+          ]
+        },
+        {
+          "id": "r-phonics-quiz",
+          "type": "quiz",
+          "title": "Letter sounds check",
+          "minutes": 6,
+          "questions": [
+            { "id": "r-phonics-q1", "prompt": "Which word starts with the /s/ sound?", "choices": ["cat", "sun", "hat", "bat"], "answer": 1, "hint": "Say each word slowly and listen to the first sound." },
+            { "id": "r-phonics-q2", "prompt": "Which letter makes the /m/ sound?", "choices": ["n", "m", "w", "r"], "answer": 1, "hint": "Think of the word mop." },
+            { "id": "r-phonics-q3", "prompt": "Which word starts with the /k/ sound?", "choices": ["dog", "fish", "cup", "jump"], "answer": 2, "hint": "The letter c can say /k/." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "r-sight",
+      "name": "Sight words",
+      "prereqs": ["r-phonics"],
+      "activities": [
+        {
+          "id": "r-sight-reading",
+          "type": "reading",
+          "title": "Words you learn by sight",
+          "minutes": 8,
+          "body": [
+            "Sight words are common words you learn to recognize quickly, such as the, said, want, and were.",
+            "Many of them do not follow the usual sound rules, so practice seeing the whole word."
+          ]
+        },
+        {
+          "id": "r-sight-quiz",
+          "type": "quiz",
+          "title": "Sight words check",
+          "minutes": 6,
+          "questions": [
+            { "id": "r-sight-q1", "prompt": "Which spelling is the word said?", "choices": ["sed", "said", "sayed", "saud"], "answer": 1, "hint": "The ai makes the e sound here." },
+            { "id": "r-sight-q2", "prompt": "Do you ___ to play? Choose the word.", "choices": ["wand", "want", "wont", "wat"], "answer": 1, "hint": "You use it to say you wish for something." },
+            { "id": "r-sight-q3", "prompt": "Which spelling is the word were?", "choices": ["wher", "were", "wrere", "weer"], "answer": 1, "hint": "The w comes first, then e-r-e." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "r-main-idea",
+      "name": "Main idea",
+      "prereqs": ["r-sight"],
+      "activities": [
+        {
+          "id": "r-main-idea-reading",
+          "type": "reading",
+          "title": "What a text is mostly about",
+          "minutes": 8,
+          "body": [
+            "The main idea is what a passage is mostly about. Details support it.",
+            "Example: Bees collect nectar. They make honey in the hive. Honey feeds the colony. The main idea is that bees make honey to feed their colony."
+          ]
+        },
+        {
+          "id": "r-main-idea-quiz",
+          "type": "quiz",
+          "title": "Main idea check",
+          "minutes": 6,
+          "questions": [
+            { "id": "r-main-idea-q1", "prompt": "Bees collect nectar. They make honey in the hive. Honey feeds the colony. What is the main idea?", "choices": ["Bees make honey to feed their colony", "Flowers are red", "Trees need water", "The sun is hot"], "answer": 0, "hint": "Which choice covers all three sentences?" },
+            { "id": "r-main-idea-q2", "prompt": "Rain fell all day. Puddles grew on the road. Kids stayed inside. What is the main idea?", "choices": ["Kids love puddles", "Rain fell all day and changed the day", "The road was dirty", "It was a sunny day"], "answer": 1, "hint": "Which choice describes what the whole passage is about?" },
+            { "id": "r-main-idea-q3", "prompt": "Which best describes a main idea?", "choices": ["A sentence about one small fact", "A statement of what the text is mostly about", "A word that is new", "A question at the end"], "answer": 1, "hint": "The main idea is broader than any one detail." }
+          ]
+        }
+      ]
+    }
+  ]
+}

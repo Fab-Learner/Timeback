@@ -1,0 +1,14 @@
+{
+  "name": "timeback",
+  "version": "0.1.0",
+  "description": "Two-hour, mastery-based AI tutoring platform for K-12 students with a guide dashboard.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.5"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "test": "node --test --disable-warning=ExperimentalWarning"
+  }
+}

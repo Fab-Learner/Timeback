@@ -1,0 +1,146 @@
+{
+  "subject": "Math",
+  "skills": [
+    {
+      "id": "m-counting",
+      "name": "Counting to 100",
+      "prereqs": [],
+      "activities": [
+        {
+          "id": "m-counting-lesson",
+          "type": "video",
+          "title": "Counting forward from any number",
+          "minutes": 8,
+          "url": null,
+          "body": [
+            "Placeholder lesson. Connect a licensed video URL in content/math.json.",
+            "Counting means saying numbers in order. Start at 47 and say the next numbers: 48, 49, 50."
+          ]
+        },
+        {
+          "id": "m-counting-quiz",
+          "type": "quiz",
+          "title": "Counting check",
+          "minutes": 6,
+          "questions": [
+            { "id": "m-counting-q1", "prompt": "What number comes right after 29?", "choices": ["27", "28", "30", "39"], "answer": 2, "hint": "Say the numbers in order, starting at 29." },
+            { "id": "m-counting-q2", "prompt": "What is 10 more than 45?", "choices": ["35", "54", "55", "46"], "answer": 2, "hint": "Adding 10 changes the tens digit only." },
+            { "id": "m-counting-q3", "prompt": "Which number is missing? 60, 61, __, 63", "choices": ["51", "62", "64", "60"], "answer": 1, "hint": "Look at which number comes between 61 and 63." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m-addition",
+      "name": "Addition within 20",
+      "prereqs": ["m-counting"],
+      "activities": [
+        {
+          "id": "m-addition-reading",
+          "type": "reading",
+          "title": "Combining two groups",
+          "minutes": 8,
+          "body": [
+            "Adding means combining two groups to find how many there are in all.",
+            "Example: 4 apples and 3 apples make 7 apples. You can count on from the bigger number: 4, then 5, 6, 7."
+          ]
+        },
+        {
+          "id": "m-addition-quiz",
+          "type": "quiz",
+          "title": "Addition check",
+          "minutes": 6,
+          "questions": [
+            { "id": "m-addition-q1", "prompt": "7 + 8 = ?", "choices": ["13", "14", "15", "16"], "answer": 2, "hint": "Count on 8 from 7." },
+            { "id": "m-addition-q2", "prompt": "9 + 6 = ?", "choices": ["14", "15", "16", "17"], "answer": 1, "hint": "Make 10 first: take 1 from the 6 and add it to the 9." },
+            { "id": "m-addition-q3", "prompt": "12 + 5 = ?", "choices": ["15", "16", "17", "18"], "answer": 2, "hint": "Start at 12 and count up 5." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m-subtraction",
+      "name": "Subtraction within 20",
+      "prereqs": ["m-addition"],
+      "activities": [
+        {
+          "id": "m-subtraction-reading",
+          "type": "reading",
+          "title": "Taking away",
+          "minutes": 8,
+          "body": [
+            "Subtraction finds how many are left after some are taken away, or how far apart two numbers are.",
+            "Subtraction is the reverse of addition: if 9 + 6 = 15, then 15 - 6 = 9."
+          ]
+        },
+        {
+          "id": "m-subtraction-quiz",
+          "type": "quiz",
+          "title": "Subtraction check",
+          "minutes": 6,
+          "questions": [
+            { "id": "m-subtraction-q1", "prompt": "15 - 6 = ?", "choices": ["7", "8", "9", "10"], "answer": 2, "hint": "Think of which number plus 6 makes 15." },
+            { "id": "m-subtraction-q2", "prompt": "20 - 13 = ?", "choices": ["6", "7", "8", "9"], "answer": 1, "hint": "Count back 13 from 20, or count up from 13 to 20." },
+            { "id": "m-subtraction-q3", "prompt": "18 - 9 = ?", "choices": ["8", "9", "10", "11"], "answer": 1, "hint": "Double 9 and check: what plus 9 makes 18?" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m-multiplication",
+      "name": "Multiplication facts",
+      "prereqs": ["m-addition"],
+      "activities": [
+        {
+          "id": "m-multiplication-reading",
+          "type": "reading",
+          "title": "Equal groups",
+          "minutes": 8,
+          "body": [
+            "Multiplication is repeated addition of equal groups.",
+            "3 x 4 means three groups of 4: 4 + 4 + 4 = 12."
+          ]
+        },
+        {
+          "id": "m-multiplication-quiz",
+          "type": "quiz",
+          "title": "Multiplication check",
+          "minutes": 6,
+          "questions": [
+            { "id": "m-multiplication-q1", "prompt": "3 x 4 = ?", "choices": ["7", "10", "12", "14"], "answer": 2, "hint": "Add 4 three times." },
+            { "id": "m-multiplication-q2", "prompt": "5 x 6 = ?", "choices": ["25", "30", "35", "56"], "answer": 1, "hint": "Count by fives six times." },
+            { "id": "m-multiplication-q3", "prompt": "2 x 9 = ?", "choices": ["16", "17", "18", "19"], "answer": 2, "hint": "Two groups of nine." }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "m-fractions",
+      "name": "Unit fractions",
+      "prereqs": ["m-multiplication"],
+      "activities": [
+        {
+          "id": "m-fractions-reading",
+          "type": "reading",
+          "title": "What a unit fraction is",
+          "minutes": 8,
+          "body": [
+            "A unit fraction has a numerator of 1, such as 1/4 or 1/8.",
+            "It names one of equal parts. The more parts a whole is cut into, the smaller each part is."
+          ]
+        },
+        {
+          "id": "m-fractions-quiz",
+          "type": "quiz",
+          "title": "Fractions check",
+          "minutes": 6,
+          "questions": [
+            { "id": "m-fractions-q1", "prompt": "Which is a unit fraction?", "choices": ["2/3", "1/5", "3/3", "4/2"], "answer": 1, "hint": "Look for a numerator of 1." },
+            { "id": "m-fractions-q2", "prompt": "A pizza is cut into 8 equal slices and you eat 1. What fraction did you eat?", "choices": ["8/1", "1/8", "7/8", "1/7"], "answer": 1, "hint": "One part out of eight equal parts." },
+            { "id": "m-fractions-q3", "prompt": "Which is larger, 1/2 or 1/4?", "choices": ["1/4", "1/2", "They are equal", "Neither"], "answer": 1, "hint": "Which whole is cut into fewer pieces?" }
+          ]
+        }
+      ]
+    }
+  ]
+}

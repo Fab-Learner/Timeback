@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>TimeBack · Student</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="top">
+    <h1>TimeBack</h1>
+    <nav>
+      <a href="index.html" aria-current="page">Student</a>
+      <a href="guide.html">Guide</a>
+    </nav>
+  </header>
+
+  <main class="layout">
+    <section class="panel">
+      <label class="field">
+        Student
+        <select id="student"></select>
+      </label>
+      <button id="start" class="primary wide">Start 2-hour session</button>
+
+      <div class="meter">
+        <div class="meter-label">Session time <span id="time">not started</span></div>
+        <div class="bar"><div id="timeBar"></div></div>
+      </div>
+      <div class="meter">
+        <div class="meter-label">Waste meter <span id="waste">—</span></div>
+        <div class="bar"><div id="wasteBar"></div></div>
+        <p class="muted small">Idle time and hidden-tab time count toward waste.</p>
+      </div>
+    </section>
+
+    <section class="panel activity" id="activity">
+      <p class="muted">Start a session to see the next activity.</p>
+    </section>
+
+    <aside class="panel">
+      <h2>Skills</h2>
+      <ul id="skills" class="skills"></ul>
+    </aside>
+  </main>
+
+  <p id="error" class="error" hidden></p>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
